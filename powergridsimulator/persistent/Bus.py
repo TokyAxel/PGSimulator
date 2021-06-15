@@ -31,7 +31,7 @@ class Bus:
         Vmin : float
 
 
-    """ : float
+    """
 
     def __init__(self, id : int = None, btype : int = None ) -> None:
         self._id = id
