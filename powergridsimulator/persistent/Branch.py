@@ -1,6 +1,8 @@
+from persistent.Bus import Bus
+
 class Branch:
     """Artificial function object. This allows the creation of functions with different
-        dimension and structure to be used for benchmarking in many different settings.
+    dimension and structure to be used for benchmarking in many different settings.
         Parameters
         ----------
         name: str
@@ -43,10 +45,12 @@ class Branch:
         self._angmax = None
 
 
-    def set_fbus(self, value: int) -> None:
+    def set_fbus(self, value: Bus) -> None:
+    """ This allows us to say from witch bus this branch is from """
         self._fbus = value
         
-    def set_tbus(self, value: int) -> None:
+    def set_tbus(self, value: Bus) -> None:
+    """ This allows us to say to witch bus this branch goes to"""
         self._tbus = value
 
     def set_r(self, value: float) -> None:
@@ -82,10 +86,10 @@ class Branch:
     def set_angmax(self, value: float) -> None:
         self._angmax = value
 
-    def get_fbus(self)->int:
+    def get_fbus(self)->Bus:
         return self._fbus
         
-    def get_tbus(self)->int:
+    def get_tbus(self)->Bus:
         return self._tbus
         
     def get_r(self)->float:
