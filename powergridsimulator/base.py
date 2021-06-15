@@ -19,10 +19,10 @@ class Powergridsimulator:
         buses = []
         for i in range(0,raw_data["bus"].shape[0]):
             buses.append(Bus(data = self._raw_data["bus"][i]))
-            
+
         ### merge "gen" and "gencost" matrix 
         self._raw_data["all_gen"] = np.concatenate((self._raw_data["gen"],self._raw_data["gencost"]),axis=1)
-        ### delete row "2"
+        ### delete column "2"
         self._raw_data["all_gen"] = np.delete(self._raw_data["all_gen"],[10:11],axis=1)
 
         for i in range(0,raw_data["gen"].shape[0]):
@@ -31,5 +31,8 @@ class Powergridsimulator:
 
         for i in range(0,raw_data["branch"].shape[0]):
             self._network.add_branch(Branch(self._raw_data["branch"][i]))
+
+    def get_network(self) -> Network :
+        return self._network
         
 
