@@ -1,6 +1,9 @@
+import numpy as np
+from persistent.Generator import Generator
+
 class Bus:
     """
-        Bus classe : representation of nodes in network with some parameters
+        Node object in network with some parameters
 
         Parameters
         ----------
@@ -30,23 +33,66 @@ class Bus:
 
         Vmin : float
 
-
     """
 
-    def __init__(self, id : int = None, btype : int = None ) -> None:
-        self._id = id
-        self._btype = btype
-        self._Pd = None
-        self._Qd = None
-        self._Gs = None
-        self._Bs = None
-        self._area = None
-        self._Vm = None
-        self._Va = None
-        self._BaseKV = None
-        self._zone = None
-        self._Vmax = None
-        self._Vmin = None
+    def __init__(self, id : int = None, btype : int = None, data : np.ndarray = None ) -> None:
+        if data is None :
+            self._id = id
+            self._btype = btype
+            self._Pd = None
+            self._Qd = None
+            self._Gs = None
+            self._Bs = None
+            self._area = None
+            self._Vm = None
+            self._Va = None
+            self._BaseKV = None
+            self._zone = None
+            self._Vmax = None
+            self._Vmin = None
+            self._generators = []
+        else :
+            try :
+                self.load_bus(data)
+            except :
+                raise
+    
+    def load_bus(self, data : np.ndarray ) -> None :
+        self.set_id(data[0])
+        self.set_btype(data[1])
+        self.set_Pd(data[2])
+        self.set_Qd(data[3])
+        self.set_Gs(data[4])
+        self.set_Bs(data[5])
+        self.set_area(data[6])
+        self.set_Vm(data[7])
+        self.set_Va(data[8])
+        self.set_BaseKV(data[9])
+        self.set_zone(data[10])
+        self.set_Vmax(data[11])
+        self.set_Vmin(data[12])
+        
+    def add_generator(self, data : np.ndarray ) -> None :
+        if self._generators == [] :
+            self._generators.append(Generator(data))
+        else :
+            self._generators[data[0]].load_generator(data)
+
+    def get_params(self) -> dict :
+        return {"id": self._id, 
+                "type": self._btype, 
+                "Pd": self._Pd, 
+                "Qd": self._Qd, 
+                "Gs": self._Gs, 
+                "Bs": self._Bs, 
+                "area": self._area, 
+                "Vm": self._Vm, 
+                "Va": self._Va, 
+                "BaseKV": self._BaseKV, 
+                "zone": self._zone, 
+                "Vmax": self._Vmax,
+                "Vmin": self._Vmin
+                }
 
     def set_id(self, value : int) -> None :
         self._id = value
