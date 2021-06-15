@@ -1,4 +1,31 @@
 class Branch:
+    """Artificial function object. This allows the creation of functions with different
+        dimension and structure to be used for benchmarking in many different settings.
+        Parameters
+        ----------
+        name: str
+            name of the underlying function to use (like "sphere" for instance). If a wrong
+            name is provided, an error is raised with all existing names.
+        block_dimension: int
+            the dimension on which the underlying function will be applied.
+        num_blocks: int
+            the number of blocks of size "block_dimension" on which the underlying function
+            will be applied. The number of useful dimension is therefore num_blocks * core_dimension
+        useless_variables: int
+            the number of additional variables which have no impact on the core function.
+            The full dimension of the function is therefore useless_variables + num_blocks * core_dimension
+        noise_level: float
+            noise level for the additive noise: noise_level * N(0, 1, size=1) * [f(x + N(0, 1, size=dim)) - f(x)]
+        noise_dissymmetry: bool
+            True if we dissymmetrize the model of noise
+        rotation: bool
+            whether the block space should be rotated (random rotation)
+        hashing: bool
+            whether the input data should be hashed. In this case, the function expects an array of size 1 with
+            string as element.
+        aggregator: str
+            how to aggregate the multiple block outputs"""
+
 
     def __init__(self) -> None:
         self._fbus = None
@@ -14,7 +41,6 @@ class Branch:
         self._status = None
         self._angmin = None
         self._angmax = None
-        pass
 
 
     def set_fbus(self, value: int) -> None:
