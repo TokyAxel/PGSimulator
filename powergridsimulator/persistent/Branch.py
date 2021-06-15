@@ -19,11 +19,11 @@ class Branch:
 
 
     def set_fbus(self, value: Bus) -> None:
-    """ This allows us to say from witch bus this branch is from """
+        """ This allows us to say from witch bus this branch is from """
         self._fbus = value
         
     def set_tbus(self, value: Bus) -> None:
-    """ This allows us to say to witch bus this branch goes to"""
+        """ This allows us to say to witch bus this branch goes to"""
         self._tbus = value
 
     def set_r(self, value: float) -> None:
