@@ -97,7 +97,7 @@ class Bus:
     def set_id(self, value : int) -> None :
         self._id = value
     
-    def set_type(self, value : int ) -> None :
+    def set_btype(self, value : int ) -> None :
         self._btype = value
 
     def set_Pd(self, value : float ) -> None :
