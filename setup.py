@@ -4,15 +4,15 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="powergridsimulator",
+    name="PGSimulator",
     version="0.1.0",
     author="RASOANAIVO Andry, ANDRIAMALALA Rahamefy Solofohanitra, ANDRIAMIZAKASON Toky Axel",
     author_email="tokyandriaxel@gmail.com",
-    description="An electrical grid simulator to calculate the least grid cost using optimizers from nevergrad package.",
+    description="A Power Grid Simulator to calculate the least grid cost using optimizers from nevergrad package.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/TokyAxel/powergridsimulator",
-    packages=setuptools.find_packages(include=['powergridsimulator', 'powergridsimulator.*']),
+    url="https://github.com/TokyAxel/PGSimulator",
+    packages=setuptools.find_packages(include=['PGSimulator', 'PGSimulator.*']),
     include_package_data=True,
     #package_data={'mixsimulator': ['data/RIToamasina/dataset_RI_Toamasina.csv']},
     classifiers=[
