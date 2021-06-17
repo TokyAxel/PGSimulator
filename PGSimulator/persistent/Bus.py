@@ -1,5 +1,5 @@
 import numpy as np
-from persistent.Generator import Generator
+from .Generator import Generator
 
 class Bus:
     """

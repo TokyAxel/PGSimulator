@@ -1,9 +1,10 @@
-from persistent.Network import Network
-from persistent.Branch import Branch
-from persistent.Bus import Bus
-from oct2py import octave as oct
+from .persistent import Branch, Bus, Network
+try :
+    from oct2py import octave as oct
+except :
+    pass
 
-class Powergridsimulator:
+class PGSimulator:
     """
         Initiate a network simulator based on a dataset
     """
@@ -14,7 +15,11 @@ class Powergridsimulator:
 
     def set_data_matlab(self, bind : str = None) -> None :
         
-        self._raw_data = oct.feval(bind)
+        try :
+            self._raw_data = oct.feval(bind)
+        except :
+            print("Please install oct2py and its dependencies if you want to use set_data_matlab()")
+            raise
         
         buses = []
         for i in range(0,raw_data["bus"].shape[0]):
@@ -23,7 +28,7 @@ class Powergridsimulator:
         ### merge "gen" and "gencost" matrix 
         self._raw_data["all_gen"] = np.concatenate((self._raw_data["gen"],self._raw_data["gencost"]),axis=1)
         ### delete column "2"
-        self._raw_data["all_gen"] = np.delete(self._raw_data["all_gen"],[10:11],axis=1)
+        self._raw_data["all_gen"] = np.delete(self._raw_data["all_gen"],[10],axis=1)
 
         for i in range(0,raw_data["gen"].shape[0]):
             buses[self._raw_data["gen"][i][0]].add_generator(data = self._raw_data["all_gen"][i])

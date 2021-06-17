@@ -1,4 +1,4 @@
-from persistent.Bus import Bus
+from .Bus import Bus
 
 class Branch:
 
