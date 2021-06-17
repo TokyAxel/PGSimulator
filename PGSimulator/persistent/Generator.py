@@ -51,19 +51,19 @@ class Generator:
                 raise
     
     def load_generator(self, data : np.ndarray ) -> None :
-        self.set_bus_id(data[0])
+        self.set_bus_id(int(data[0]))
         self.set_Pg(data[1])
         self.set_Qg(data[2])
         self.set_Qmax(data[3])
         self.set_Qmin(data[4])
         self.set_Vg(data[5])
         self.set_mBase(data[6])
-        self.set_status(data[7])
+        self.set_status(int(data[7]))
         self.set_Pmax(data[8])
         self.set_Pmin(data[9])
         self.set_startup(data[10])
         self.set_shutdown(data[11])
-        self.set_n(data[12])
+        self.set_n(int(data[12]))
         self.set_cn_1(data[13])	
         self.set_3p(data[14])	
         self.set_c0(data[15])
@@ -183,6 +183,26 @@ class Generator:
 
     def get_c0(self) -> float :
         return self._c0
+
+    def get_generator_data(self) -> list:
+        return [
+            self.get_bus_id(),
+            self.get_Pg(),
+            self.get_Qg(),
+            self.get_Qmax(),
+            self.get_Qmin(),
+            self.get_Vg(),
+            self.get_mBase(),
+            self.get_status(),
+            self.get_Pmax(),
+            self.get_Pmin(),
+            self.get_startup(),
+            self.get_shutdown(),
+            self.get_n(),
+            self.get_cn_1(),	
+            self.get_3p(),	
+            self.get_c0()
+        ]
 
 
 
