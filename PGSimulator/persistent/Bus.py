@@ -76,7 +76,7 @@ class Bus:
         
     def add_generator(self, data : np.ndarray ) -> None :
         #if self._generators == [] :
-        self._generators.append(Generator(data))
+        self._generators.append(Generator(data=data))
         #else :
             #self._generators[int(data[0])].load_generator(data)
 
@@ -178,10 +178,8 @@ class Bus:
         return self._generators 
 
     def get_generators_data(self) -> np.array :
-        data = []
         for i in range(0,len(self._generators)):
-            data.append(self._generators[i].get_generator_data())
-        return np.array(data)
+            yield self._generators[i].get_generator_data()
 
     def get_bus_data(self) -> dict :
         """ Notes : spec. = specifications """
@@ -200,7 +198,7 @@ class Bus:
                         self.get_Vmax(),
                         self.get_Vmin()]),
                 "Generator(s) spec.":
-                        self.get_generators_data()
+                        np.array([output for output in self.get_generators_data()], dtype="object")
             }
 
 

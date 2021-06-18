@@ -46,7 +46,7 @@ class Network:
 
     def get_network_data(self) -> dict :
         """ get all data from network as numpy.ndarray """
-        return {"Buses":np.array([bus_.get_bus_data() for bus_ in self._buses]), "Branches":np.array([br_.get_branch_data() for br_ in self._branches])}
+        return {"Buses":np.array([bus_.get_bus_data() for bus_ in self._buses], dtype="object"), "Branches":np.array([br_.get_branch_data() for br_ in self._branches], dtype="object")}
 
 
 
