@@ -16,7 +16,8 @@ class Generator:
         mBase	
         status	
         Pmax	
-        Pmin 	 
+        Pmin
+        cost_model 	 
         startup	
         shutdown	
         n	
@@ -37,6 +38,7 @@ class Generator:
             self._status = None
             self._Pmax = None
             self._Pmin = None
+            self._cost_model = None
             self._startup = None
             self._shutdown = None
             self._n = None
@@ -61,12 +63,13 @@ class Generator:
         self.set_status(int(data[7]))
         self.set_Pmax(data[8])
         self.set_Pmin(data[9])
-        self.set_startup(data[10])
-        self.set_shutdown(data[11])
-        self.set_n(int(data[12]))
-        self.set_cn_1(data[13])	
-        self.set_3p(data[14])	
-        self.set_c0(data[15])
+        self.set_cost_model(int(data[10]))
+        self.set_startup(data[11])
+        self.set_shutdown(data[12])
+        self.set_n(int(data[13]))
+        self.set_cn_1(data[14])	
+        self.set_3p(data[15])	
+        self.set_c0(data[16])
 
     def get_params(self) -> dict :
         return {"bus_id": self._bus_id, 
@@ -79,6 +82,7 @@ class Generator:
                 "status": self._status, 
                 "Pmax": self._Pmax, 
                 "Pmin": self._Pmin, 
+                "cost model (1 = piecewise linear, 2 = polynomial)": self.cost_model, 
                 "startup": self._startup, 
                 "shutdown": self._shutdown,
                 "n": self._n,
@@ -116,6 +120,9 @@ class Generator:
 
     def set_Pmin(self, value : float)-> None :
         self._Pmin = value
+
+    def set_cost_model(self, value : int)-> None :
+        self._cost_model = value
 
     def set_startup(self, value : float)-> None :
         self._startup = value
@@ -166,6 +173,9 @@ class Generator:
     def get_Pmin(self) -> float :
         return self._Pmin
 
+    def get_cost_model(self) -> int :
+        return self._cost_model
+
     def get_startup(self) -> float :
         return self._startup
 
@@ -196,6 +206,7 @@ class Generator:
             self.get_status(),
             self.get_Pmax(),
             self.get_Pmin(),
+            self.get_cost_model(),
             self.get_startup(),
             self.get_shutdown(),
             self.get_n(),

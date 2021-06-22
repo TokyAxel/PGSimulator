@@ -98,28 +98,31 @@ class Optimizer():
         for tmp_budget in range(0, total_budget):
             x = optimizer.ask()
             #TODO --> DEFINE func_to_optimize
-            loss = func_to_optimize(*x.args, constraints["time_interval"])
+            loss = func_to_optimize(*x.args)
             optimizer.tell(x, loss)
-            if (tmp_budget+1)%step == 0:
-                result_per_budget = {}
-                recommendation = optimizer.provide_recommendation()
-                result_per_budget.update({"loss": func_to_optimize(recommendation.value, constraints["time_interval"])})
-                result_per_budget.update({"coef": recommendation.value})
+
+        recommendation = optimizer.provide_recommendation()
+        return recommendation.value
+            #if (tmp_budget+1)%step == 0:
+                #result_per_budget = {}
+                #recommendation = optimizer.provide_recommendation()
+                #result_per_budget.update({"loss": func_to_optimize(recommendation.value)})
+                #result_per_budget.update({"coef": recommendation.value})
                 
                 #TODO --> DEFINE all constraints
-                if grid is not None :
-                    usage_coef = grid.arrange_coef_as_array_of_array(recommendation.value)
-                    weighted_coef = grid.get_weighted_coef(usage_coef, time_interval=constraints["time_interval"])
-                    production = 0
-                    u_demand = 0
-                    for t in range(0, len(weighted_coef)):
-                        production +=  grid.get_production_cost_at_t(weighted_coef[t], t, constraints["time_interval"])
-                        u_demand += grid.get_unsatisfied_demand_at_t(weighted_coef[t], t, constraints["time_interval"])
-                    result_per_budget.update({"production": production})
-                    result_per_budget.update({"unsatisfied demand": u_demand})
+                #if grid is not None :
+                    #usage_coef = grid.arrange_coef_as_array_of_array(recommendation.value)
+                    #weighted_coef = grid.get_weighted_coef(usage_coef, time_interval=constraints["time_interval"])
+                    #production = 0
+                    #u_demand = 0
+                    #for t in range(0, len(weighted_coef)):
+                        #production +=  grid.get_production_cost_at_t(weighted_coef[t], t, constraints["time_interval"])
+                        #u_demand += grid.get_unsatisfied_demand_at_t(weighted_coef[t], t, constraints["time_interval"])
+                    #result_per_budget.update({"production": production})
+                    #result_per_budget.update({"unsatisfied demand": u_demand})
                     #result_per_budget.update({"carbon production": mix.get_carbon_production_at_t(weighted_coef[t], constraints["time_interval"])})
-                result_per_budget.update({"elapsed_time": time.time() - start_time})
-                result.append(result_per_budget)
+                #result_per_budget.update({"elapsed_time": time.time() - start_time})
+                #result.append(result_per_budget)
                 
         #TODO --> Check Constraints     
-        return result
+        #return result

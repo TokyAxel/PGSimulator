@@ -1,5 +1,6 @@
 import numpy as np
 from .Branch import Branch
+from .Generator import Generator
 from .Bus import Bus
 from typing import List, Any, Type, Dict
 
@@ -43,6 +44,12 @@ class Network:
 
     def get_buses(self) -> List[Bus]:
         return self._buses
+
+    def get_generators(self) -> List[Generator]:
+        all_gen = []
+        for bus in self.get_buses():
+            all_gen.append(gen for gen in bus.get_generators())
+        return all_gen
 
     def get_network_data(self) -> dict :
         """ get all data from network as numpy.ndarray """
