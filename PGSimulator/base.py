@@ -119,7 +119,7 @@ class PGSimulator:
                 ### power generated on each bus
                 for g in range(0,len(self._network.get_buses()[i].get_generators())):
                     try:
-                        power += complex(candidate[i][0],self._network.get_all_generators()[g].get_Qg())
+                        power += complex(candidate[i][0],candidate[i][1])
                     except:
                         print("pass cause bus doesn't have gen")
                         pass
@@ -129,7 +129,7 @@ class PGSimulator:
                 
                 ### Bus shunt 
                 power -= ( (complex(self._network.get_buses()[i].get_Gs(),self._network.get_buses()[i].get_Bs()))
-                * (candidate[i][1] * candidate[i][1]) )
+                * (candidate[i][2] * candidate[i][2]) )
 
                 ### AC power flow
                 for br in range(0,len(self._network.get_branches())):
@@ -137,10 +137,10 @@ class PGSimulator:
                         ### S_lij
                         flow += ( 
                         (( complex(self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate(), -1. *  self._network.get_branches()[br].get_b()/2) )
-                        * ( (candidate[i][1] * candidate[i][1])
+                        * ( (candidate[i][2] * candidate[i][2])
                         / (abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio())) * abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()))) ))
                         - ((self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate()) 
-                        * ( complex(candidate[i][1] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.cos(candidate[i][1] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()), candidate[i][1] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.sin(candidate[i][1] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()))
+                        * ( complex(candidate[i][2] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.cos(candidate[i][3] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()), candidate[i][2] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.sin(candidate[i][3] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()))
                         / self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) 
                         )
                         ### S_lji
@@ -186,7 +186,7 @@ class PGSimulator:
         self.plot = plot
 
         # optimizer parametrization 
-        self._opt_params(len(self._network.get_buses()),3)
+        self._opt_params(len(self._network.get_buses()),4)
         
         # init constraints
         constraints = {}
