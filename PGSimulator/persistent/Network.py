@@ -45,10 +45,11 @@ class Network:
     def get_buses(self) -> List[Bus]:
         return self._buses
 
-    def get_generators(self) -> List[Generator]:
+    def get_all_generators(self) -> List[Generator]:
         all_gen = []
         for bus in self.get_buses():
-            all_gen.append(gen for gen in bus.get_generators())
+            for gen in bus.get_generators():
+                all_gen.append(gen)
         return all_gen
 
     def get_network_data(self) -> dict :
