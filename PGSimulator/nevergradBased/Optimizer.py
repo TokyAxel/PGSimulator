@@ -57,7 +57,7 @@ class Optimizer():
         return self.__parametrization
         
     def set_budget(self,budget: List[int] = [100]):
-        #setting budget 
+        ### setting budget 
         #possible to do? auto calculate a optimal budget depending of the size of data
         self.__budget = budget
     
@@ -65,8 +65,6 @@ class Optimizer():
         return self.__budget
     
     def set_num_worker(self,n_work):
-        #setting budget 
-        #possible to do? auto calculate a optimal budget depending of the size of data
         self.__num_worker = n_work
     
     def get_num_worker(self):
@@ -93,11 +91,12 @@ class Optimizer():
         #optimization under constraints
         chaining_algo = ng.optimizers.Chaining(self.__optimizers, budgets[:-1])
         optimizer = chaining_algo(parametrization=self.get_parametrization(), budget = budgets[-1], num_workers=self.get_num_worker())
+        optimizer.parametrization.register_cheap_constraint(lambda x: constraints["voltage bounds"](x))
+        optimizer.parametrization.register_cheap_constraint(lambda x: constraints["generator_bounds"](x))
          
         #let's minimize
         for tmp_budget in range(0, total_budget):
             x = optimizer.ask()
-            #TODO --> DEFINE func_to_optimize
             loss = func_to_optimize(*x.args)
             optimizer.tell(x, loss)
 

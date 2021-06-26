@@ -71,9 +71,9 @@ class PGSimulator:
         elif gen is not None : 
             """return Power injection and power injection range (min & max)"""
             if Pg is None :
-                return complex(gen.get_Pg(),gen.get_Qg()), complex(gen.get_Pmax(),gen.get_Qmax()), complex(gen.get_Pmin(),gen.get_Qmin())
+                return [complex(gen.get_Pg(),gen.get_Qg()), complex(gen.get_Pmax(),gen.get_Qmax()), complex(gen.get_Pmin(),gen.get_Qmin())]
             else :
-                return complex(Pg,gen.get_Qg()), complex(gen.get_Pmax(),gen.get_Qmax()), complex(gen.get_Pmin(),gen.get_Qmin())
+                return [complex(Pg,gen.get_Qg()), complex(gen.get_Pmax(),gen.get_Qmax()), complex(gen.get_Pmin(),gen.get_Qmin())]
         else :
             raise KeyError("Bus/Generator object not found")
 
@@ -93,10 +93,10 @@ class PGSimulator:
             and generator fuel cost minimization
         """
         
-        if loss_type == "line_loss":
+        if loss_type == "line_loss": # INCOMPLETE
             line_loss = 0 
-            for g in range(0,len(self._network.get_generators())):
-                line_loss += candidate[g]
+            for g in range(0,len(self._network.get_all_generators())):
+                line_loss += candidate[i][0]
             return abs(line_loss)
 
         elif loss_type == "fuel_cost":
@@ -157,18 +157,31 @@ class PGSimulator:
             print("Please choose between : line_loss, fuel_cost")
             raise KeyError
 
-    def Bus_voltage_limits(self,):
-        return None
+    def voltage_bounds(self, candidate) -> bool:
+        """
+            Bus Voltage Limits: Voltages in AC power systems shouldnot  vary  too  far  (typically ̆10%) 
+        """
+        checker = 1
+        for i in range(0,len(self._network.get_buses())): 
+            if self._network.get_buses()[i].get_Vmin() < candidate[i][2] and self._network.get_buses()[i].get_Vmax() > candidate[i][2]:
+                continue
+            else :
+                checker = 0
+                break
 
-    def Generator_bounds(self,candidate):
+        if checker == 1: return True
+        else : return False
+     
+
+    def generator_bounds(self,candidate) -> bool:
         """
             characterization of a generation capability curve
         """
-        return None
-        
-            
-
-
+        ### This version use apparent power comparison
+        for g in range(0,len(self._network.get_all_generators())):
+            if abs(self.AC_power(gen = self._network.get_all_generators()[g])[2]) > abs(complex(candidate[i][0], candidate[i][1])) or abs(self.AC_power(gen = self._network.get_all_generators()[g])[1]) < abs(complex(candidate[i][0], candidate[i][1])):
+                return False
+        return True
 
     ### OPTiMiZATION ###
 
@@ -190,7 +203,8 @@ class PGSimulator:
         
         # init constraints
         constraints = {}
-        constraints.update({"Bus Voltage Limits":None})
+        constraints.update({"voltage bounds":self.voltage_bounds})
+        constraints.update({"generator_bounds":self.voltage_bounds})
         
         #let's optimize
         results = self._optimizer.optimize(grid = self , func_to_optimize = self.loss_function, constraints=constraints, step = self.step)
