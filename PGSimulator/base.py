@@ -148,9 +148,6 @@ class PGSimulator:
                         #- () * ( / )
 
                 cost += abs( power - flow )
-            
-
-
             return cost
 
         else :
@@ -185,11 +182,62 @@ class PGSimulator:
 
     ### OPTiMiZATION ###
 
-    def _opt_params(self, len_buses, len_generators) -> None :
-        self._optimizer.set_parametrization(self.get_opt_params(len_buses,len_generators))
+    def _opt_params(self, len_buses, len_var, bounds : bool = False) -> None :
+        """
+            len_var is the number of variable to find : Pg, Qg, Vm and angle
+        """
+        self._optimizer.set_parametrization(self.get_opt_params(len_buses, len_var, bounds))
 
-    def get_opt_params(self, len_buses, len_generators) -> ng.p.Array :
-        return ng.p.Array(shape=(len_buses,len_generators)).set_bounds(0,)
+    def get_opt_params(self, len_buses, len_var, bounds : bool = False) -> ng.p.Array :
+        if bounds is False :
+            return ng.p.Array(shape=(len_buses, len_var))
+        else :
+            #variable_parametrization = []
+            #for b in range(0,len(self._network.get_buses())):
+                #try : 
+                    ### HERE WE STILL SUPPOSE ONE BUSE == ONE GENERATOR
+                    #for g in range(0,len(self._network.get_buses()[b].get_generators())):
+                        #variable_parametrization += [self._network.get_buses()[b].get_generators()[g].get_P_bounds()]
+                        #variable_parametrization += [self._network.get_buses()[b].get_generators()[g].get_P_bounds()]
+                #except :
+                    #variable_parametrization += [ng.p.Choice([0.,0.])]
+
+                #variable_parametrization += [ng.p.Scalar(lower=self._network.get_buses()[b].get_Vmin() ,upper=self._network.get_buses()[b].get_Vmax())]
+            #print(ng.p.Tuple(*variable_parametrization))
+            #return ng.p.Tuple(*variable_parametrization)
+
+            lower_bounds = []
+            upper_bounds = []
+            for b in range(0,len(self._network.get_buses())):
+                low = []
+                up = []
+                try : 
+                    ### HERE WE STILL SUPPOSE ONE BUSE == ONE GENERATOR
+                    for g in range(0,len(self._network.get_buses()[b].get_generators())):
+                        low.append(self._network.get_buses()[b].get_generators()[g].get_Pmin())
+                        low.append(self._network.get_buses()[b].get_generators()[g].get_Qmin())
+                        up.append(self._network.get_buses()[b].get_generators()[g].get_Pmax())
+                        up.append(self._network.get_buses()[b].get_generators()[g].get_Qmax())
+                        if low[0] == up[0] :
+                            up[0] = up[0]+1.e-10
+
+                except :
+                    low.append(0.)
+                    low.append(0.)
+                    upper.append(1.e-10)
+                    upper.append(1.e-10)
+                
+                low.append(self._network.get_buses()[b].get_Vmin())
+                low.append(-180)
+                up.append(self._network.get_buses()[b].get_Vmax())
+                up.append(180)
+
+                lower_bounds.append(low)
+                upper_bounds.append(up)
+
+            return ng.p.Array(shape=(len_buses, len_var), lower = np.array(lower_bounds), upper = np.array(upper_bounds))
+            
+
 
     def optimizePG(self, optimizer: Optimizer = None, loss_type : str = "fuel_cost", step : int = 1,
                     plot : str = "default"):
@@ -199,12 +247,12 @@ class PGSimulator:
         self.plot = plot
 
         # optimizer parametrization 
-        self._opt_params(len(self._network.get_buses()),4)
+        self._opt_params(len(self._network.get_buses()), 4, bounds = True)
         
         # init constraints
-        constraints = {}
-        constraints.update({"voltage bounds":self.voltage_bounds})
-        constraints.update({"generator_bounds":self.voltage_bounds})
+        constraints = None
+        #constraints.update({"voltage bounds":self.voltage_bounds})
+        #constraints.update({"generator_bounds":self.voltage_bounds})
         
         #let's optimize
         results = self._optimizer.optimize(grid = self , func_to_optimize = self.loss_function, constraints=constraints, step = self.step)

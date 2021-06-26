@@ -1,4 +1,5 @@
 import numpy as np
+import nevergrad as ng
 
 class Generator:
     """
@@ -90,6 +91,14 @@ class Generator:
                 "...": self._3p,
                 "c0": self.set_c0,
                 }
+
+    def get_P_bounds(self) -> ng.p.Choice:
+        params = ng.p.Choice([ng.p.Scalar(lower=self.get_Pmin() ,upper=self.get_Pmax())])
+        return params
+
+    def get_Q_bounds(self) -> ng.p.Choice:
+        params = ng.p.Choice([ng.p.Scalar(lower=self.get_Qmin() ,upper=self.get_Qmax())])
+        return params
 
     def set_bus_id(self, value : int) -> None :
         self._bus_id = value

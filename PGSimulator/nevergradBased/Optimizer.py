@@ -91,8 +91,9 @@ class Optimizer():
         #optimization under constraints
         chaining_algo = ng.optimizers.Chaining(self.__optimizers, budgets[:-1])
         optimizer = chaining_algo(parametrization=self.get_parametrization(), budget = budgets[-1], num_workers=self.get_num_worker())
-        optimizer.parametrization.register_cheap_constraint(lambda x: constraints["voltage bounds"](x))
-        optimizer.parametrization.register_cheap_constraint(lambda x: constraints["generator_bounds"](x))
+        if constraints is not None :
+            optimizer.parametrization.register_cheap_constraint(lambda x: constraints["voltage bounds"](x))
+            optimizer.parametrization.register_cheap_constraint(lambda x: constraints["generator_bounds"](x))
          
         #let's minimize
         for tmp_budget in range(0, total_budget):
