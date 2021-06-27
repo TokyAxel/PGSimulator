@@ -8,7 +8,7 @@ net = pgs.PGSimulator()
 print(net.get_network())
 
 ## init optimizers
-opt_CMA = pgs.Optimizer(opt = ["CMA"], budget = [200], num_worker = 1) 
+opt_CMA = pgs.Optimizer(opt = ["CMA"], budget = [1000], num_worker = 1) 
 opt_CMA_30 = pgs.Optimizer(opt = ["CMA"], budget = [200], num_worker = 30)
 
 ### load dataset on matlab

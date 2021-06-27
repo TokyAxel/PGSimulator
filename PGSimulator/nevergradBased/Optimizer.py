@@ -92,17 +92,18 @@ class Optimizer():
         chaining_algo = ng.optimizers.Chaining(self.__optimizers, budgets[:-1])
         optimizer = chaining_algo(parametrization=self.get_parametrization(), budget = budgets[-1], num_workers=self.get_num_worker())
         if constraints is not None :
-            optimizer.parametrization.register_cheap_constraint(lambda x: constraints["voltage bounds"](x))
-            optimizer.parametrization.register_cheap_constraint(lambda x: constraints["generator_bounds"](x))
+            for key in constraints.keys():
+                optimizer.parametrization.register_cheap_constraint(lambda x: constraints[key](x))
          
         #let's minimize
         for tmp_budget in range(0, total_budget):
             x = optimizer.ask()
-            loss = func_to_optimize(*x.args)
+            loss, power_flow = func_to_optimize(*x.args)
+            loss += power_flow
             optimizer.tell(x, loss)
 
         recommendation = optimizer.provide_recommendation()
-        return recommendation.value
+        return recommendation.value, func_to_optimize(recommendation.value)
             #if (tmp_budget+1)%step == 0:
                 #result_per_budget = {}
                 #recommendation = optimizer.provide_recommendation()

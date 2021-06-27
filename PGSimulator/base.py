@@ -101,7 +101,7 @@ class PGSimulator:
 
         elif loss_type == "fuel_cost":
             cost = 0
-            
+            power_flow = 0
 
             """ fuel cost objective function """
             for i in range(0,len(self._network.get_buses())):
@@ -135,20 +135,27 @@ class PGSimulator:
                 for br in range(0,len(self._network.get_branches())):
                     if self._network.get_branches()[br].get_fbus() == i+1 :
                         ### S_lij
+                        #flow += ( 
+                        #(( complex(self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate(), -1. *  self._network.get_branches()[br].get_b()/2) )
+                        #* ( (candidate[i][2] * candidate[i][2])
+                        #/ (abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio())) * abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()))) ))
+                        #- ((self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate()) 
+                        #* ( complex(candidate[i][2] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.cos(candidate[i][3] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()), candidate[i][2] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.sin(candidate[i][3] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()))
+                        #/ self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) 
+                        #)
+
                         flow += ( 
                         (( complex(self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate(), -1. *  self._network.get_branches()[br].get_b()/2) )
                         * ( (candidate[i][2] * candidate[i][2])
                         / (abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio())) * abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()))) ))
                         - ((self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate()) 
-                        * ( complex(candidate[i][2] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.cos(candidate[i][3] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()), candidate[i][2] * self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Vm() * math.sin(candidate[i][3] - self._network.get_buses()[(self._network.get_branches()[br].get_tbus())-1].get_Va()))
+                        * ( complex(candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.cos(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]), candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.sin(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]))
                         / self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) 
                         )
-                        ### S_lji
-                        #flow += () * ( ) 
-                        #- () * ( / )
 
-                cost += abs( power - flow )
-            return cost
+                power_flow += abs( power - flow )
+
+            return cost, power_flow
 
         else :
             print("Please choose between : line_loss, fuel_cost")
@@ -175,10 +182,24 @@ class PGSimulator:
             characterization of a generation capability curve
         """
         ### This version use apparent power comparison
+
         for g in range(0,len(self._network.get_all_generators())):
             if abs(self.AC_power(gen = self._network.get_all_generators()[g])[2]) > abs(complex(candidate[i][0], candidate[i][1])) or abs(self.AC_power(gen = self._network.get_all_generators()[g])[1]) < abs(complex(candidate[i][0], candidate[i][1])):
                 return False
         return True
+
+    def phase_angle_difference(self, candidate) -> bool:
+        """
+            implemented as a  linear relation of the real and imaginarycomponents of (V_i V_j^*)
+        """
+        for i in range(0,len(self._network.get_buses())):
+            for br in range(0,len(self._network.get_branches())):
+                if self._network.get_branches()[br].get_fbus() == i+1 :
+                    Vi_Vj_star = complex(candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.cos(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]), candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.sin(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]))
+                    if ( math.tan(self._network.get_branches()[br].get_angmin()) *  Vi_Vj_star.real ) > Vi_Vj_star.imag or ( math.tan(self._network.get_branches()[br].get_angmax()) *  Vi_Vj_star.real ) < Vi_Vj_star.imag :
+                        return False
+        return True
+
 
     ### OPTiMiZATION ###
 
@@ -250,9 +271,10 @@ class PGSimulator:
         self._opt_params(len(self._network.get_buses()), 4, bounds = True)
         
         # init constraints
-        constraints = None
+        constraints = {}
         #constraints.update({"voltage bounds":self.voltage_bounds})
         #constraints.update({"generator_bounds":self.voltage_bounds})
+        constraints.update({"voltage bounds":self.phase_angle_difference})
         
         #let's optimize
         results = self._optimizer.optimize(grid = self , func_to_optimize = self.loss_function, constraints=constraints, step = self.step)
