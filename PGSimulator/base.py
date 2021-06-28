@@ -102,6 +102,7 @@ class PGSimulator:
         elif loss_type == "fuel_cost":
             cost = 0
             power_flow = 0
+            count = 0
 
             """ fuel cost objective function """
             for i in range(0,len(self._network.get_buses())):
@@ -109,27 +110,27 @@ class PGSimulator:
                 flow = 0
                 for g in range(0,len(self._network.get_buses()[i].get_generators())):
                     try :
-                        cost += (self._network.get_buses()[i].get_generators()[g].get_cn_1()*(candidate[i][0]*candidate[i][0])) 
-                        + (self._network.get_buses()[i].get_generators()[g].get_3p()*candidate[i][0]) + self._network.get_buses()[i].get_generators()[g].get_c0()
+                        cost += (self._network.get_buses()[i].get_generators()[g].get_cn_1()*(candidate[0][count][0]*candidate[0][count][0])) 
+                        cost += (self._network.get_buses()[i].get_generators()[g].get_3p()*candidate[0][count][0]) + self._network.get_buses()[i].get_generators()[g].get_c0()
                     except :
                         print("pass cause bus doesn't have gen")
                         pass
 
-                """ + Ohm's law and Kirchhoff's current law as penalization """
-                ### power generated on each bus
-                for g in range(0,len(self._network.get_buses()[i].get_generators())):
+                    """ + Ohm's law and Kirchhoff's current law as penalization """
+                    ### power generated on each bus
                     try:
-                        power += complex(candidate[i][0],candidate[i][1])
+                        power += complex(candidate[0][count][0],candidate[0][count][1])
                     except:
                         print("pass cause bus doesn't have gen")
                         pass
+
+                    count += 1
 
                 ### fixed demand on each bus
                 power -= complex(self._network.get_buses()[i].get_Pd(),self._network.get_buses()[i].get_Qd())
                 
                 ### Bus shunt 
-                power -= ( (complex(self._network.get_buses()[i].get_Gs(),self._network.get_buses()[i].get_Bs()))
-                * (candidate[i][2] * candidate[i][2]) )
+                power -= ( (complex(self._network.get_buses()[i].get_Gs(),self._network.get_buses()[i].get_Bs())) * (candidate[1][i][0] * candidate[1][i][0]) )
 
                 ### AC power flow
                 for br in range(0,len(self._network.get_branches())):
@@ -144,14 +145,8 @@ class PGSimulator:
                         #/ self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) 
                         #)
 
-                        flow += ( 
-                        (( complex(self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate(), -1. *  self._network.get_branches()[br].get_b()/2) )
-                        * ( (candidate[i][2] * candidate[i][2])
-                        / (abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio())) * abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()))) ))
-                        - ((self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate()) 
-                        * ( complex(candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.cos(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]), candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.sin(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]))
-                        / self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) 
-                        )
+                        flow += ((( complex(self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate(), -1. *  self._network.get_branches()[br].get_b()/2) ) * ( (candidate[1][i][0] * candidate[1][i][0]) / (abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio())) * abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()))) )))
+                        flow += -1 * (((self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate()) * ( complex(candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.cos(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1]), candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.sin(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1])) / self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) )
 
                 power_flow += abs( power - flow )
 
@@ -167,7 +162,7 @@ class PGSimulator:
         """
         checker = 1
         for i in range(0,len(self._network.get_buses())): 
-            if self._network.get_buses()[i].get_Vmin() < candidate[i][2] and self._network.get_buses()[i].get_Vmax() > candidate[i][2]:
+            if self._network.get_buses()[i].get_Vmin() < candidate[1][i][0] and self._network.get_buses()[i].get_Vmax() > candidate[1][i][0]:
                 continue
             else :
                 checker = 0
@@ -184,18 +179,18 @@ class PGSimulator:
         ### This version use apparent power comparison
 
         for g in range(0,len(self._network.get_all_generators())):
-            if abs(self.AC_power(gen = self._network.get_all_generators()[g])[2]) > abs(complex(candidate[i][0], candidate[i][1])) or abs(self.AC_power(gen = self._network.get_all_generators()[g])[1]) < abs(complex(candidate[i][0], candidate[i][1])):
+            if abs(self.AC_power(gen = self._network.get_all_generators()[g])[2]) > abs(complex(candidate[0][g][0], candidate[0][g][1])) or abs(self.AC_power(gen = self._network.get_all_generators()[g])[1]) < abs(complex(candidate[0][g][0], candidate[0][g][1])):
                 return False
         return True
 
     def phase_angle_difference(self, candidate) -> bool:
         """
-            implemented as a  linear relation of the real and imaginarycomponents of (V_i V_j^*)
+            implemented as a  linear relation of the real and imaginary components of (V_i V_j^*)
         """
         for i in range(0,len(self._network.get_buses())):
             for br in range(0,len(self._network.get_branches())):
                 if self._network.get_branches()[br].get_fbus() == i+1 :
-                    Vi_Vj_star = complex(candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.cos(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]), candidate[i][2] * candidate[(self._network.get_branches()[br].get_tbus())-1][2] * math.sin(candidate[i][3] - candidate[(self._network.get_branches()[br].get_tbus())-1][3]))
+                    Vi_Vj_star = complex(candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.cos(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1]), candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.sin(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1]))
                     if ( math.tan(self._network.get_branches()[br].get_angmin()) *  Vi_Vj_star.real ) > Vi_Vj_star.imag or ( math.tan(self._network.get_branches()[br].get_angmax()) *  Vi_Vj_star.real ) < Vi_Vj_star.imag :
                         return False
         return True
@@ -211,7 +206,7 @@ class PGSimulator:
 
     def get_opt_params(self, len_buses, len_var, bounds : bool = False) -> ng.p.Array :
         if bounds is False :
-            return ng.p.Array(shape=(len_buses, len_var))
+            return ng.p.Array(shape=(len_buses, len_var)) #TODO
         else :
             #variable_parametrization = []
             #for b in range(0,len(self._network.get_buses())):
@@ -229,34 +224,44 @@ class PGSimulator:
 
             lower_bounds = []
             upper_bounds = []
+            lower_bounds_bus = []
+            upper_bounds_bus = []
+            n_rows = 0
             for b in range(0,len(self._network.get_buses())):
-                low = []
-                up = []
-                try : 
-                    ### HERE WE STILL SUPPOSE ONE BUSE == ONE GENERATOR
-                    for g in range(0,len(self._network.get_buses()[b].get_generators())):
-                        low.append(self._network.get_buses()[b].get_generators()[g].get_Pmin())
-                        low.append(self._network.get_buses()[b].get_generators()[g].get_Qmin())
-                        up.append(self._network.get_buses()[b].get_generators()[g].get_Pmax())
-                        up.append(self._network.get_buses()[b].get_generators()[g].get_Qmax())
-                        if low[0] == up[0] :
-                            up[0] = up[0]+1.e-10
+                low_b = [] 
+                up_b = []
+                for g in range(0,len(self._network.get_buses()[b].get_generators())):
+                    low = []
+                    up = []
+                    n_rows += 1
+                    low.append(self._network.get_buses()[b].get_generators()[g].get_Pmin())
+                    low.append(self._network.get_buses()[b].get_generators()[g].get_Qmin())
+                    up.append(self._network.get_buses()[b].get_generators()[g].get_Pmax())
+                    up.append(self._network.get_buses()[b].get_generators()[g].get_Qmax())
+                    if low[0] == up[0] :
+                        up[0] = up[0]+1.e-10
+                    elif low[1] == up[1] :
+                        up[1] = up[1]+1.e-10
+                    lower_bounds.append(low)
+                    upper_bounds.append(up)
 
-                except :
-                    low.append(0.)
-                    low.append(0.)
-                    upper.append(1.e-10)
-                    upper.append(1.e-10)
-                
-                low.append(self._network.get_buses()[b].get_Vmin())
-                low.append(-180)
-                up.append(self._network.get_buses()[b].get_Vmax())
-                up.append(180)
+                low_b.append(self._network.get_buses()[b].get_Vmin())
+                low_b.append(-180)
+                up_b.append(self._network.get_buses()[b].get_Vmax())
+                up_b.append(180)
 
-                lower_bounds.append(low)
-                upper_bounds.append(up)
+                lower_bounds_bus.append(low_b)
+                upper_bounds_bus.append(up_b)
+            #print(np.array(lower_bounds))
+            #print(np.array(lower_bounds_bus))
+            #print(n_rows)
+            generators_params = ng.p.Array(shape=(n_rows, int(len_var/2)), lower = np.array(lower_bounds), upper = np.array(upper_bounds))
+            buses_params = ng.p.Array(shape=(len(self._network.get_buses()), int(len_var/2)), lower = np.array(lower_bounds_bus), upper = np.array(upper_bounds_bus))
 
-            return ng.p.Array(shape=(len_buses, len_var), lower = np.array(lower_bounds), upper = np.array(upper_bounds))
+            #print(generators_params)
+            #print(buses_params)
+
+            return ng.p.Tuple(generators_params, buses_params)
             
 
 

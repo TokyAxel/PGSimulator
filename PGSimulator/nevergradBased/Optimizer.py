@@ -99,7 +99,7 @@ class Optimizer():
         for tmp_budget in range(0, total_budget):
             x = optimizer.ask()
             loss, power_flow = func_to_optimize(*x.args)
-            loss += power_flow
+            loss = loss + power_flow
             optimizer.tell(x, loss)
 
         recommendation = optimizer.provide_recommendation()
