@@ -1,3 +1,4 @@
+import oct2py
 from .persistent.Branch import Branch
 from .persistent.Bus import Bus
 from .persistent.Generator import Generator
@@ -96,7 +97,7 @@ class PGSimulator:
         if loss_type == "line_loss": # INCOMPLETE
             line_loss = 0 
             for g in range(0,len(self._network.get_all_generators())):
-                line_loss += candidate[i][0]
+                line_loss += candidate[g][0]
             return abs(line_loss)
 
         elif loss_type == "fuel_cost":
