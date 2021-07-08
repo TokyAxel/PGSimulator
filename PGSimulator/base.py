@@ -183,6 +183,21 @@ class PGSimulator:
                 return False
         return True
 
+    def line_thermal_limit(self, candidate) -> bool:
+        """
+            AC power lines have thermal limits to prevent lines from sagging and automatic protection devices from activating. 
+            Here we constraint the apparent power under voltage limit
+            
+            Polar form is used : Sij = Pij + i*Qij
+        """
+        for i in range(0,len(self._network.get_buses())):
+            for br in range(0,len(self._network.get_branches())):
+                if self._network.get_branches()[br].get_fbus() == i+1 :
+                    pass 
+                    if condition == None :
+                        return False
+        return True
+
     def phase_angle_difference(self, candidate) -> bool:
         """
             implemented as a  linear relation of the real and imaginary components of (V_i V_j^*)
@@ -246,9 +261,9 @@ class PGSimulator:
                     upper_bounds.append(up)
 
                 low_b.append(self._network.get_buses()[b].get_Vmin())
-                low_b.append(-180)
+                low_b.append(-30)
                 up_b.append(self._network.get_buses()[b].get_Vmax())
-                up_b.append(180)
+                up_b.append(30)
 
                 lower_bounds_bus.append(low_b)
                 upper_bounds_bus.append(up_b)
