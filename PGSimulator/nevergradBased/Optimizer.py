@@ -96,21 +96,27 @@ class Optimizer():
                 optimizer.parametrization.register_cheap_constraint(lambda x: constraints[key](x))
          
         #let's minimize
+        data_results = {"losses":[],"costs":[],"power_flows":[]}
         for tmp_budget in range(0, total_budget):
             x = optimizer.ask()
-            loss, power_flow = func_to_optimize(*x.args)
-            loss = loss + power_flow
+            cost, power_flow = func_to_optimize(*x.args)
+            loss = cost + power_flow
             optimizer.tell(x, loss)
 
+            if (tmp_budget+1)%step == 0:
+                data_results["losses"].append(cost + power_flow)
+                data_results["costs"].append(cost)
+                data_results["power_flows"].append(power_flow)
+
         recommendation = optimizer.provide_recommendation()
-        return recommendation.value, func_to_optimize(recommendation.value)
+        return [recommendation.value, func_to_optimize(recommendation.value), total_budget, data_results]
             #if (tmp_budget+1)%step == 0:
                 #result_per_budget = {}
                 #recommendation = optimizer.provide_recommendation()
                 #result_per_budget.update({"loss": func_to_optimize(recommendation.value)})
                 #result_per_budget.update({"coef": recommendation.value})
                 
-                #TODO --> DEFINE all constraints
+                
                 #if grid is not None :
                     #usage_coef = grid.arrange_coef_as_array_of_array(recommendation.value)
                     #weighted_coef = grid.get_weighted_coef(usage_coef, time_interval=constraints["time_interval"])

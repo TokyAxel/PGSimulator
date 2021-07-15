@@ -4,16 +4,21 @@ from .Generator import Generator
 
 class Bus:
     """
-        Node object in network with some parameters
+        Node object in network : 
+        visit https://matpower.org/docs/MATPOWER-manual.pdf for some details.
 
         Parameters
         ----------
         id : int
             unique identity
         btype : int
-            type of the bus (TODO -> checkout all types)
+            type of the bus :
+             - 1 : PQ ;
+             - 2 : PV ;
+             - 3 : ref ;
+             - 4 : isolated.
         Pd : float
-            Pd is ... TODO
+            Pd is load active power (P demand)
         Qd : float
 
         Gs : float
