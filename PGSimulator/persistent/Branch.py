@@ -138,3 +138,8 @@ class Branch:
             self.get_angmax(),
         ])
     
+    def get_admittance(self):
+        """
+            Branch admittance T = Z^-1 (inverse of the impedance)
+        """
+        return complex(self._r/((self._r**2)+(self._x**2)), (-1. * self._x ) / ((self._r**2)+(self._x**2))) 

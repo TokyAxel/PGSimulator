@@ -88,12 +88,6 @@ class PGSimulator:
         else :
             raise KeyError("Bus/Generator object not found")
 
-    def br_admittance(self, r ,x ):
-        """
-            Branch admittance T = Z^-1 (inverse of the impedance)
-        """
-        return complex(r/((r**2)+(x**2)), (-1. * x ) / ((r**2)+(x**2))) 
-
     def transformer(sef, angle, tap):
         """
             Transformer parameters
@@ -147,8 +141,8 @@ class PGSimulator:
                 ### AC power flow
                 for br in range(0,len(self._network.get_branches())):
                     if self._network.get_branches()[br].get_fbus() == i+1 :
-                        flow += ((( complex(self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate(), -1. *  self._network.get_branches()[br].get_b()/2) ) * ( (candidate[1][i][0]**2) / (abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio())) * abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()))) )))
-                        flow -= (((self.br_admittance(self._network.get_branches()[br].get_r(),self._network.get_branches()[br].get_x()).conjugate()) * ( complex(candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.cos(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1]), candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.sin(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1])) / self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) )
+                        flow += ((( complex(self._network.get_branches()[br].get_admittance().conjugate(), -1. *  self._network.get_branches()[br].get_b()/2) ) * ( (candidate[1][i][0]**2) / (abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio())) * abs(self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()))) )))
+                        flow -= (((self._network.get_branches()[br].get_admittance().conjugate()) * ( complex(candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.cos(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1]), candidate[1][i][0] * candidate[1][(self._network.get_branches()[br].get_tbus())-1][0] * math.sin(candidate[1][i][1] - candidate[1][(self._network.get_branches()[br].get_tbus())-1][1])) / self.transformer(self._network.get_branches()[br].get_angle(), self._network.get_branches()[br].get_ratio()) ) ) )
 
             power_flow += abs( abs(power) - abs(flow) )
 
