@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from .Bus import Bus
 
@@ -138,3 +139,18 @@ class Branch:
             self.get_angmax(),
         ])
     
+    def get_admittance(self):
+        """
+            Branch admittance T = Z^-1 (inverse of the impedance)
+        """
+        return complex(self._r/((self._r**2)+(self._x**2)), (-1. * self._x ) / ((self._r**2)+(self._x**2)))
+
+    def get_transformer(self):
+        """
+            Transformer parameters
+        """
+        value = complex( self._ratio*math.cos(pow(self._angle, self._ratio)),  self._ratio*math.sin(pow(self._angle, self._ratio))) 
+        if abs(value) == 0:
+            return complex(1,0)
+        else :
+            return value 
