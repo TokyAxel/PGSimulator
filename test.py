@@ -8,9 +8,9 @@ net = pgs.PGSimulator()
 print(net.get_network())
 
 ## init optimizers
-opt_CMA = pgs.Optimizer(opt = ["CMA"], budget = [1000], num_worker = 1) 
-opt_CMA_30 = pgs.Optimizer(opt = ["CMA"], budget = [200], num_worker = 30)
-opt_NGOpt = pgs.Optimizer(opt = ["NGOpt"], budget = [2700], num_worker = 1) 
+opt_CMA = pgs.Optimizer(opt = ["CMA"], budget = [5000], num_worker = 1) 
+opt_CMA_30 = pgs.Optimizer(opt = ["CMA"], budget = [5000], num_worker = 30)
+opt_NGOpt = pgs.Optimizer(opt = ["NGOpt"], budget = [7000], num_worker = 1) 
 
 ### load dataset on matlab
 """
@@ -23,7 +23,7 @@ net.set_data_matlab("PGSimulator/data/pglib-opf/pglib_opf_case3_lmbd.m")
 ### Optimization
 #print(net.optimizePG(loss_type = "fuel_cost"))
 
-print(net.optimizePG(optimizer = opt_NGOpt, loss_type = "fuel_cost", step = 100))
+print(net.optimizePG(optimizer = opt_NGOpt, loss_type = "fuel_cost", step = 100, plot="default"))
 #Default optimizer (OnePlusOne)
 #print(net.optimizePG(loss_type = "fuel_cost"))
 
@@ -37,7 +37,7 @@ net.set_data_matlab("PGSimulator/data/pglib-opf/pglib_opf_case5_pjm.m")
 ### Optimization
 #print(net.optimizePG(loss_type = "fuel_cost"))
 
-print(net.optimizePG(optimizer = opt_NGOpt, loss_type = "fuel_cost", step = 100))
+print(net.optimizePG(optimizer = opt_NGOpt, loss_type = "fuel_cost", step = 100, plot="default"))
 #Default optimizer (OnePlusOne)
 #print(net.optimizePG(loss_type = "fuel_cost"))
 
@@ -51,7 +51,7 @@ net.set_data_matlab("PGSimulator/data/pglib-opf/pglib_opf_case14_ieee.m")
 ### Optimization
 #print(net.optimizePG(loss_type = "fuel_cost"))
 
-print(net.optimizePG(optimizer = opt_NGOpt, loss_type = "fuel_cost", step = 100))
+print(net.optimizePG(optimizer = opt_NGOpt, loss_type = "fuel_cost", step = 100, plot="default"))
 #Default optimizer (OnePlusOne)
 #print(net.optimizePG(loss_type = "fuel_cost"))
 

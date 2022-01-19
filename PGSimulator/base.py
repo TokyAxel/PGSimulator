@@ -6,7 +6,9 @@ from .persistent.Network import Network
 import nevergrad as ng
 from .nevergradBased.Optimizer import Optimizer
 import matplotlib.pyplot as plt
+from datetime import datetime
 import numpy as np
+import warnings
 import cmath
 import math
 
@@ -108,6 +110,13 @@ class PGSimulator:
         """
             Objective functions are line loss minimization 
             and generator fuel cost minimization
+
+            candidate definition :
+                - candidate[0] = [ [p,q] * number of generators] 
+                    where p is active power et q reactive power
+                - candidate[1] = [ [Mag,Ang] * number of buses ]
+                    where Mag is voltage magnitude and Ang is phase angle
+
         """
         
         if loss_type == "line_loss": # INCOMPLETE TODO
